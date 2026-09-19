@@ -1,0 +1,81 @@
+StoragePlugin — src/plugins/StoragePlugin.js
+============================================
+
+What it does
+------------
+Provides persistence across Web Storage (localStorage, sessionStorage), cookies,
+and import/export support for reactive state via JSON files. Enables automatic
+synchronization of DataStore branches into localStorage on every reactive mutation.
+
+Options (install(app, options))
+-------------------------------
+syncPaths      array<string>   default: []
+  List of DataStore paths (e.g. ["user", "config.theme"]) hydrated on startup
+  and automatically persisted to localStorage on every DATA_CHANGED event.
+
+storagePrefix  string          default: "sp_"
+  Prefix prepended to all localStorage/sessionStorage keys to prevent collisions
+  with other libraries or domains.
+
+Registered Actions
+------------------
+storage.set
+  Persists a value or DataStore path to localStorage or sessionStorage.
+  Params:
+    key        string   required — storage key name
+    path       string   optional — DataStore path whose value will be saved
+    value      any      optional — explicit value to save (if "path" is omitted)
+    storage    string   optional, default: "local" — "local" or "session"
+
+  Example:
+    { "type": "storage.set", "key": "profile", "path": "user" }
+
+storage.get
+  Reads a storage key and writes the value to a DataStore path.
+  Params:
+    key          string   required — storage key name
+    targetPath   string   required — target path in DataStore
+    storage      string   optional, default: "local" — "local" or "session"
+    defaultValue any      optional, default: null — fallback if key does not exist
+
+  Example:
+    { "type": "storage.get", "key": "profile", "targetPath": "user" }
+
+storage.remove
+  Removes a specific key from storage.
+  Params:
+    key        string   required — key to remove
+    storage    string   optional, default: "local"
+
+storage.clear
+  Removes all keys matching the configured storagePrefix.
+  Params:
+    storage    string   optional, default: "local"
+
+cookie.set
+  Writes a JSON-serialized cookie with a defined expiration.
+  Params:
+    name       string   required — cookie name
+    value      any      required — value/structure to persist
+    days       number   optional, default: 7 — validity period in days
+    path       string   optional, default: "/"
+
+cookie.get
+  Reads and parses a cookie into the DataStore.
+  Params:
+    name         string   required — cookie name
+    targetPath   string   required — target DataStore path
+    defaultValue any      optional, default: null
+
+file.downloadJson
+  Downloads the full app state or a DataStore branch as a .json file.
+  Params:
+    filename   string   optional, default: "state.json"
+    path       string   optional — specific DataStore path to export
+
+file.uploadJson
+  Opens the native OS file picker to upload a .json file, injecting it into
+  the DataStore or performing a complete state reload.
+  Params:
+    targetPath   string   optional — path where parsed JSON is injected
+    reloadState  boolean  optional, default: false — reloads entire state if true

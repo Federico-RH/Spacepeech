@@ -1,0 +1,25 @@
+/*
+ * canvas.css — Spacepeech Viewer
+ *
+ * Reset base únicamente. Sin estilos de header, toolbar ni barra de estado
+ * (no existen más en el Viewer). Los nodos renderizados reciben sus estilos
+ * vía StyleManager (CSS inyectado en <head>) + el CSS global que trae el
+ * propio JSON de estado (state.css).
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/*
+ * #canvas es el contenedor directo de los nodos renderizados.
+ * No fuerza ningún layout propio: el JSON trae su propio layout
+ * (incluido en state.css, inyectado por ViewerApp.loadState()).
+ */
+#canvas {
+  min-height: 100vh;
+}

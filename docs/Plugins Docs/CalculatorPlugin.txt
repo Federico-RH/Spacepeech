@@ -1,0 +1,71 @@
+CalculatorPlugin — src/plugins/CalculatorPlugin.js
+==========================================
+
+What it does
+------------
+DOM-decoupled arithmetic calculation engine. It maintains its entire state
+inside the DataStore under the "calc.*" namespace, allowing any UI node to
+display it via data-binding without the plugin having direct awareness of the UI.
+
+Maintained State in DataStore
+-----------------------------
+calc.display    string        Current value shown on screen (defaults to "0")
+calc.prev       number|null   Operand stored prior to applying an operator
+calc.op         string|null   Pending operator ("+", "-", "×"/"*", "÷"/", "%")
+calc.history    string        Last evaluated expression for display reference
+calc.resetNext  boolean       Internal flag: whether the next digit replaces
+                              the display or appends to it
+
+Options (install(app, options))
+-------------------------------
+None. install(app) takes no options.
+
+Registered Actions
+------------------
+calc.digit
+  Enters a digit or decimal point onto the display.
+  Params:
+    char           string   required — digit ("0"-"9") or "."
+    resetOnNext    boolean  optional, default: false — not consumed by internal
+                            logic (which handles resets via calc.resetNext);
+                            accepted for signature compatibility
+
+  If the display is "0" and char is not ".", it replaces "0" instead of
+  appending (preventing "05"). Decimal points are ignored if one is already present.
+
+  Example:
+    { "type": "calc.digit", "char": "7" }
+
+calc.operator
+  Selects an operator. If an operand and operator are already pending
+  (chained operations, e.g. "5 + 3 +"), it resolves the pending operation
+  first before storing the new operator.
+  Params:
+    op   string   required — "+", "-", "×" or "*", "÷" or "/", "%"
+
+  Example:
+    { "type": "calc.operator", "op": "+" }
+
+calc.equals
+  Evaluates the pending operation (calc.prev, calc.op, calc.display) and
+  outputs the result. No-op if no operator is pending.
+  Params: none
+
+calc.clear
+  Resets display, prev, op, history, and resetNext to their initial state (C).
+  Params: none
+
+calc.delete
+  Deletes the last character from the display (Backspace/DEL). If one character
+  remains or the display is already "0", it resets to "0" rather than emptying.
+  Params: none
+
+calc.toggleSign
+  Inverts the sign of the current value on the display (±).
+  Params: none
+
+Notes
+-----
+Results are rounded to 8 decimal places (toFixed(8) + Number()) to mitigate
+standard JavaScript floating-point noise (e.g. 0.1 + 0.2). Division by zero
+returns the string "Error" instead of Infinity/NaN.

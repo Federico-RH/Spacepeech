@@ -1,0 +1,90 @@
+UiKitPlugin — src/plugins/UiKitPlugin.js
+==========================================
+
+What it does
+------------
+Acts as Spacepeech's entry point for custom UI element types (extending beyond
+standard JSON contract tags/types like div, button, input, etc.). It leverages
+the app.renderer.registerElementType(type, compilerFn) hook exposed by the
+Renderer, allowing a page JSON to declare "type": "<custom-type>" and have
+the engine compile it using a custom function instead of the default compiler.
+
+UiKitPlugin includes an initial sample element out of the box: "toggle-button"
+(an on/off switch). It also injects its own stylesheet inside a dedicated
+<style id="sp-uikit-css"> element (via DomFacade) to avoid collisions with
+dynamic page CSS.
+
+It installs like any catalog plugin (see DEFAULT_PLUGINS in spacepeech-loader.js).
+It can be disabled with enabled: false if not needed, or replaced by a custom
+kit using the exact same technique described below.
+
+Registering Custom UI Types
+---------------------------
+The standard pattern — used internally by UiKitPlugin for "toggle-button" —
+is writing a custom plugin that invokes this in its install(app) method:
+
+  app.renderer.registerElementType(type, (jsonNode, domFacade) => {
+    // build and return the HTMLElement for jsonNode
+  });
+
+compilerFn receives:
+  jsonNode   The JSON page node (id, class, data, bind, etc.)
+  domFacade  The DOM adapter used by the core (app.dom) — never access
+             document.* directly to maintain DOM isolation and portability.
+
+and must return the root HTMLElement of that node. The Renderer handles
+standard attributes and data-binding (_applyAttributes / _applyData)
+afterwards, just like any other node; the compiler only needs to construct
+the widget's internal DOM structure.
+
+Any plugin can call registerElementType — there is no need to modify
+UiKitPlugin to add new types. Simply install your custom plugin (installation
+order does not matter: registerElementType only needs to run before the first
+node of that type is compiled).
+
+Options (install(app, options))
+-------------------------------
+No configurable options — install(app) accepts no options. If you need to
+customize appearance (e.g., changing toggle-button colors without forking),
+the recommended approach is writing a custom plugin with a dedicated "type"
+(e.g., "my-toggle").
+
+Registered Element Types
+------------------------
+toggle-button
+  Accessible on/off switch (uses a hidden <input type="checkbox"> + <label>,
+  allowing its state to be read or bound like a standard checkbox).
+
+  Node Structure:
+  {
+    "id": "notif-toggle",
+    "type": "toggle-button",
+    "class": "optional",
+    "disabled": false,
+    "bind": "user.notificationsEnabled",
+    "data": { "text": "Enable notifications" }
+  }
+
+  Notes:
+  - "bind" follows standard JSON contract data-binding — it is not a widget-specific attribute.
+  - "data.text" (or alias "data.label") is optional; if omitted, the toggle renders without a label.
+  - "disabled: true" applies the disabled attribute to both the <input> and the wrapper.
+
+Reference Custom UI Plugin Example
+----------------------------------
+// MyRatingPlugin.js
+export const MyRatingPlugin = {
+  name: "my-rating",
+  async install(app) {
+    app.renderer.registerElementType("star-rating", (jsonNode, dom) => {
+      const wrapper = dom.createHtmlEl("div");
+      wrapper.id = jsonNode.id;
+      wrapper.className = "my-star-rating";
+      // ... build star elements ...
+      return wrapper;
+    });
+  }
+};
+
+With this, any JSON node with "type": "star-rating" compiles through
+that function, identical to how "toggle-button" is compiled by UiKitPlugin.

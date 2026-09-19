@@ -1,0 +1,117 @@
+// =============================================================================
+// FILE: form-plugin-lifecycle.txt
+// =============================================================================
+
+FORM PLUGIN: LIFECYCLE, STATE MACHINE, AND TRANSPORT
+=============================================================================
+
+1. INITIALIZATION AND INSTALLATION
+-----------------------------------------------------------------------------
+1.1. During startup (PluginManager.flushPending), FormPlugin.install(app)
+     registers declarative actions in ActionManager:
+     - form.submit: Request dispatching, validation, and HTTP state machine.
+     - form.validate: Pre-emptive form validation rules check.
+     - form.reset: Field restoration to default values.
+     - form.selectFile: File picker with Base64 encoding.
+
+
+2. REACTIVE STATE MACHINE (DataStore)
+-----------------------------------------------------------------------------
+The plugin transparently manages three reactive flags at the form path (<path>):
+
+- <path>._submitting (Boolean):
+  Indicates an active in-flight request. Allows disabling buttons and showing
+  loading indicators via data-binding ("disabled": "{{form._submitting}}").
+
+- <path>._status (String):
+  Represents current state: "idle" | "submitting" | "success" | "error".
+
+- <path>._errors (Object | null):
+  Key-value dictionary containing field errors ({ "email": "Required" })
+  or general server errors ({ "general": "500 Server Error" }).
+
+
+3. EXECUTION FLOW OF form.submit
+-----------------------------------------------------------------------------
+3.1. Action Trigger:
+     A node emits the action (e.g., button click or form submit):
+     { "type": "form.submit", "path": "contact", "endpoint": "/api/contact" }
+
+3.2. Declarative Validation Phase:
+     If params.validate is defined, each rule is evaluated:
+     - required: Mandatory field.
+     - minLength / maxLength: String length limits.
+     - min / max: Numerical ranges.
+     - type: "email": Valid email format.
+     - regex: Custom regular expression.
+     * On failure: Populates <path>._errors, sets _status to "error",
+       and aborts submission prior to dispatching any network request.
+
+3.3. In-Flight Loading Phase:
+     - Sets <path>._submitting = true.
+     - Sets <path>._status = "submitting".
+     - Clears previous errors (<path>._errors = null).
+
+3.4. HTTP Transport Phase:
+     - Sanitizes the payload by stripping private state properties
+       (_submitting, _errors, _status) to avoid polluting the API request.
+     - Executes fetch(endpoint) using POST, PUT, PATCH, or GET.
+
+3.5. Resolution and Response Phase:
+     - Success (HTTP 200-299):
+       * Sets <path>._submitting = false and <path>._status = "success".
+       * If resetOnSuccess: true, clears form fields.
+       * If the server returned a new JSON tree (result.root) and
+         replaceState: true, calls app.loadState(result) (View Hot-Swap).
+       * If onSuccess is defined, dispatches the subsequent action.
+     - Error (Network failure or HTTP 4xx/5xx):
+       * Writes the error message to <path>._errors.general.
+       * Sets <path>._submitting = false and <path>._status = "error".
+       * If onError is defined, dispatches the fallback action.
+
+
+4. JSON CONTRACT INTEGRATION EXAMPLE
+-----------------------------------------------------------------------------
+{
+  "id": "contact-form",
+  "type": "div",
+  "children": [
+    {
+      "id": "input-email",
+      "type": "input",
+      "bind": "contact.email",
+      "data": { "placeholder": "Your email address..." }
+    },
+    {
+      "id": "error-email",
+      "type": "span",
+      "data": { "text": "{{contact._errors.email}}" },
+      "style": { "color": "red" }
+    },
+    {
+      "id": "btn-submit",
+      "type": "button",
+      "disabled": "{{contact._submitting}}",
+      "data": {
+        "text": "{{contact._submitting ? 'Sending...' : 'Send Message'}}"
+      },
+      "actions": {
+        "click": {
+          "type": "form.submit",
+          "path": "contact",
+          "endpoint": "/api/contact",
+          "validate": {
+            "email": { "required": true, "type": "email", "message": "Invalid email" },
+            "message": { "required": true, "minLength": 10 }
+          },
+          "resetOnSuccess": true,
+          "onSuccess": {
+            "type": "sys.emit",
+            "event": "contact_sent"
+          }
+        }
+      }
+    }
+  ]
+}
+=============================================================================

@@ -1,0 +1,11 @@
+{
+  "name": "spacepeech-lib",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Vanilla JavaScript RAD system for building data dashboard interfaces, with no build step.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test"
+  }
+}

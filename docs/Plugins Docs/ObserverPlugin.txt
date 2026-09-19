@@ -1,0 +1,51 @@
+ObserverPlugin — src/plugins/ObserverPlugin.js
+==============================================
+
+What it does
+------------
+Manages viewport visibility detection via the native IntersectionObserver API.
+Optimized for infinite scrolling and lazy-loading tree branches without
+attaching expensive scroll event listeners.
+
+Options (install(app, options))
+-------------------------------
+rootMargin   string          default: "100px"
+  Virtual margin around the viewport to trigger loading before the element
+  actually enters the visible screen.
+
+threshold    number|array    default: 0.1
+  Intersection ratio required to consider the node visible (0.0 to 1.0).
+
+Registered Actions
+------------------
+observer.observe
+  Starts monitoring a DOM node and dispatches actions upon entering or exiting the viewport.
+  Params:
+    targetId   string        optional — ID of the node to observe (default: emitter node)
+    onEnter    object|array  optional — action or pipeline to execute when entering viewport
+    onExit     object|array  optional — action or pipeline to execute when exiting viewport
+    once       boolean       optional, default: true — unobserves after the first trigger
+
+  Example:
+    {
+      "type": "observer.observe",
+      "targetId": "sentinel-bottom",
+      "onEnter": { "type": "pagination.appendBatch", "containerId": "feed-container" }
+    }
+
+observer.unobserve
+  Stops observing a specific node.
+  Params:
+    targetId   string   optional — ID of the node (default: emitter node)
+
+pagination.appendBatch
+  Appends a batch of child nodes inside a container and indexes a new sentinel.
+  Params:
+    containerId       string   required — container ID where nodes will be appended
+    nodes             array    required — array of node JSON definitions
+    nextIndicatorId   string   optional — ID of a new sentinel element to observe
+
+Listened Events
+---------------
+Events.NODE_REMOVED → Automatically unobserves/disconnects if the observed node
+                      is removed from the tree, preventing memory leaks.

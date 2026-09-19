@@ -1,0 +1,95 @@
+@startuml
+
+package "core" {
+  class EventBus
+  class DataStore
+  class BindingEngine
+  class ActionManager
+  class PluginManager
+  class ErrorReporter
+  class ExpressionEvaluator
+  class AppError
+  class ValidationError
+  class RenderError
+  class ActionError
+  class NetworkError
+  class ConfigError
+  class "Events (const)" as Events
+  class "SystemActions (catalog)" as SystemActions
+  class "NodeTree (functions)" as NodeTree
+
+  AppError <|-- ValidationError
+  AppError <|-- RenderError
+  AppError <|-- ActionError
+  AppError <|-- NetworkError
+  AppError <|-- ConfigError
+}
+
+package "engine" {
+  class Renderer
+}
+
+package "infra" {
+  class DataService
+  class SystemDriver
+  class DomAccess
+}
+
+package "adapters" {
+  class DomFacade
+  class StyleManager
+  class SystemAdapter
+}
+
+package "spacepeech" {
+  class Spacepeech
+}
+
+' --- Orquestación ---
+Spacepeech --> EventBus : owns
+Spacepeech --> DataStore : owns
+Spacepeech --> BindingEngine : owns
+Spacepeech --> ActionManager : owns
+Spacepeech --> PluginManager : owns
+Spacepeech --> Renderer : owns
+Spacepeech --> DataService : owns
+Spacepeech --> StyleManager : owns
+Spacepeech --> SystemAdapter : owns
+Spacepeech --> SystemDriver : owns
+Spacepeech --> DomFacade : uses (singleton)
+Spacepeech --> NodeTree : uses
+
+' --- Expresiones y datos ---
+DataStore --> ExpressionEvaluator : delegates evaluation
+ActionManager --> ExpressionEvaluator : evaluates "if"
+ActionManager --> SystemActions : dispatches
+DataStore --> EventBus : emits DATA_CHANGED
+BindingEngine --> EventBus : listens DATA_CHANGED / SET_DATA_PROP
+BindingEngine --> DataStore : reads/writes
+
+' --- Render y estilos ---
+Renderer --> EventBus : listens STATE_CHANGED / NODE_*
+Renderer --> DomFacade : manipulates DOM
+StyleManager --> EventBus : listens STATE_CHANGED / NODE_*
+StyleManager --> DomFacade : injects <style>
+
+' --- Sistema / DOM ---
+DomFacade --> DomAccess : wraps
+SystemAdapter --> SystemDriver : reads sensors
+SystemAdapter --> DataStore : writes $sys.*
+
+' --- Errores ---
+ActionManager ..> ErrorReporter : reports
+Spacepeech ..> ErrorReporter : reports
+DataService ..> NetworkError : throws
+ActionManager ..> ActionError : throws
+NodeTree ..> ConfigError : throws
+
+note right of ExpressionEvaluator
+  Sin Function()/eval(). Gramática
+  cerrada (tokenizer + parser propio),
+  sin regla de llamada ni de acceso
+  a propiedad sobre un valor.
+end note
+
+@enduml

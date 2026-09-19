@@ -1,0 +1,54 @@
+InteractiveControlsPlugin — src/plugins/InteractiveControlsPlugin.js
+======================================================================
+
+What it does
+------------
+High-precision interactive controls: rotary dials, bounded step sliders,
+and collapsible panel/dropdown toggles.
+
+Options (install(app, options))
+-------------------------------
+None. install(app) takes no options.
+
+Registered Actions
+------------------
+controls.rotateDial
+  Rotates a dial by adding degrees on each click and maps the resulting angle
+  to a DataStore path. Optionally applies an inline CSS rotate(Ndeg) transform
+  to a visual indicator node (knob).
+  Params:
+    path                string   required — DataStore path storing the angle
+    step                number   optional, default: 15 — degrees added per execution
+    maxAngle            number   optional, default: 270 — resets to 0 when exceeded (modulo)
+    targetIndicatorId   string   optional — node ID to apply style rotate(Ndeg) directly
+
+  Example:
+    { "type": "controls.rotateDial", "path": "volume", "step": 10, "maxAngle": 270, "targetIndicatorId": "volume-knob" }
+
+controls.sliderStep
+  Increments or decrements a numeric value in the DataStore within bounds.
+  Params:
+    path   string   required — DataStore path
+    step   number   optional, default: 1 — amount to add/subtract (supports negative numbers)
+    min    number   optional, default: 0
+    max    number   optional, default: 100
+
+  Example:
+    { "type": "controls.sliderStep", "path": "brightness", "step": -5, "min": 0, "max": 100 }
+
+controls.toggleDropdown
+  Toggles a boolean in the DataStore (if path is provided) and/or toggles a
+  CSS class on a target node (typically for showing/hiding a panel).
+  Params:
+    path        string   optional — boolean DataStore path to invert
+    targetId    string   optional — target node ID (default: emitter node)
+    openClass   string   optional, default: "open" — CSS class to toggle
+
+  Example:
+    { "type": "controls.toggleDropdown", "path": "menuOpen", "targetId": "config-panel" }
+
+Notes
+-----
+None of the three actions require pre-existing numeric values at "path" — if
+undefined in the DataStore, they initialize from 0 (rotateDial, sliderStep)
+or "false" (toggleDropdown).

@@ -1,0 +1,130 @@
+RealtimePlugin — src/plugins/RealtimePlugin.js
+================================================
+
+What it does
+------------
+Opens a real-time data channel via WebSocket and translates incoming server
+messages into the exact same EventBus events triggered by regular user
+interactions (ADD_NODE, REMOVE_NODE, MOVE_NODE, REPLACE_BRANCH, DataStore.set).
+It introduces no new rendering pipeline: the socket acts merely as an
+additional producer on the existing bus, allowing any widget with data-binding
+to react to incoming data.patch payloads seamlessly without modifications.
+
+By default, it waits for the initial render (Events.STATE_CHANGED) before
+opening the connection, and automatically reconnects using exponential backoff
+if the socket drops.
+
+Endpoint Resolution (Priority Order)
+------------------------------------
+1. options.endpoint — Explicitly defined when registering the plugin.
+2. Initial handshake response (Events.HANDSHAKE_COMPLETE), if the backend returns
+   { realtime: { endpoint, token? } }. This is the recommended approach: the
+   server dictates the endpoint and/or session token in the single handshake
+   round-trip, eliminating the need for a secondary config endpoint.
+3. app._mergedConfig.wsEndpoint, defined in spacepeech.config.json or passed
+   inside the options object to spacepeechInit/Spacepeech.init.
+4. Automatically derived from baseUrl (http→ws, https→wss) + options.path
+   (default "/ws"), unless options.deriveFromBaseUrl is set to false.
+
+If none of these resolve a valid URL, the plugin remains installed but idle —
+without throwing errors or blocking the application startup.
+
+Options (install(app, options))
+-------------------------------
+endpoint string (optional)
+  Explicit ws:// or wss:// URL. Has the highest priority over all other methods.
+
+token string (optional)
+  Initial session token, if already known prior to the handshake. Sent as a
+  query parameter (?token=) in the connection URL.
+
+path string (optional, default: "/ws")
+  Path used when deriving the endpoint from baseUrl.
+
+deriveFromBaseUrl boolean (optional, default: true)
+  When false, disables automatic resolution from baseUrl (useful when the data
+  server and WebSocket server are hosted on separate infrastructures and baseUrl
+  assumptions do not apply).
+
+backoffMs array<number> (optional, default: [1000, 2000, 4000, 8000])
+  Successive reconnection retry delays, in milliseconds, after each disconnection.
+  Retries cease once the end of the array is reached.
+
+connectOnFirstRender boolean (optional, default: true)
+  When true, waits for the initial Events.STATE_CHANGED before establishing the
+  socket connection (prevents processing incoming messages against an uninitialized
+  DataStore/tree). Set to false to connect immediately upon plugin installation.
+
+Emitted Events
+--------------
+REALTIME_CONNECTED { url }
+  The socket completed the WebSocket handshake and is open.
+
+REALTIME_DISCONNECTED {}
+  The socket closed (by server, network failure, or ws.reconnect).
+
+REALTIME_MESSAGE <payload>
+  Any incoming message whose "type" does not match any recognized system type
+  is re-emitted as-is without transformation, allowing custom plugins or actions
+  to listen to it (e.g., notifications, presence).
+
+Incoming Message Protocol (Server → Client)
+-------------------------------------------
+Every message is a JSON payload containing a "type" key. Recognized types:
+
+data.patch
+  { "type": "data.patch", "path": "user.balance", "value": 1200 }
+  Equivalent to dataStore.set(path, value) — triggers reactive data-binding
+  for any node subscribed to that path.
+
+node.insert
+  { "type": "node.insert", "jsonNode": {...}, "parentId": "panel-1" }
+  Equivalent to emitting ADD_NODE — inserts a node (or branch with
+  component-instance; resolved just like any standard ADD_NODE).
+
+node.remove
+  { "type": "node.remove", "nodeId": "widget-7" }
+
+node.move
+  { "type": "node.move", "nodeId": "widget-7", "targetParentId": "panel-2" }
+
+branch.replace
+  { "type": "branch.replace", "targetId": "widget-7", "newBranch": {...} }
+  Replaces an entire node/branch — ideal for pushing a fully recalculated
+  widget from the server, rather than a single atomic value.
+
+state.reload
+  { "type": "state.reload", "state": {...} }
+  Replaces the complete application state (equivalent to app.loadState(state)).
+
+Registered Actions
+------------------
+ws.send
+  Sends the action node (excluding the action's own "type" key) as-is as a
+  JSON payload to the server. If the socket is not currently open, the message
+  is discarded with a warning — it does not throw or break action pipelines.
+
+  Example:
+  { "type": "ws.send", "event": "chat.message", "text": "hello" }
+  → Server receives: {"event":"chat.message","text":"hello"}
+
+ws.reconnect
+  Forces the immediate closure of the current socket (if active) and triggers
+  an instant reconnection, resetting the backoff counter. Useful for manual
+  "reconnect" UI buttons.
+
+  Example:
+  { "type": "ws.reconnect" }
+
+Typical Configuration Example (spacepeech.config.json)
+------------------------------------------------------
+{
+  "baseUrl": "https://api.mydomain.com",
+  "handshakeEndpoint": "/api/handshake",
+  "wsEndpoint": "wss://api.mydomain.com/ws"
+}
+
+With handshakeEndpoint configured, the backend only needs to return
+{ "realtime": { "endpoint": "...", "token": "..." } } in the handshake
+response for RealtimePlugin to connect — wsEndpoint acts as a fallback if
+the backend does not participate in that handshake negotiation.

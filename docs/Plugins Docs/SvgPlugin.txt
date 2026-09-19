@@ -1,0 +1,41 @@
+SvgPlugin — src/plugins/SvgPlugin.js
+==========================================
+
+What it does
+------------
+Utilities for manipulating SVG attributes reactively via declarative
+actions — tailored for circular progress indicators, animated charts,
+and fine-grained visual tweaks outside the standard style/data pipeline.
+
+Options (install(app, options))
+-------------------------------
+None. install(app) takes no options.
+
+Registered Actions
+------------------
+svg.setAttr
+  Sets any SVG attribute on a target node.
+  Params:
+    targetId   string   optional — target node ID (default: emitter node)
+    attr       string   required — attribute name (e.g., "stroke", "d", "viewBox")
+    value      any      required — value to set (cast to String)
+
+  Example:
+    { "type": "svg.setAttr", "attr": "stroke", "value": "#22c55e" }
+
+svg.setProgress
+  Animates the stroke of a progress circle/path by adjusting stroke-dashoffset.
+  Params:
+    targetId       string   optional — target node ID (default: emitter node)
+    percent        number   required — 0 to 100 (clamped to range)
+    circumference  number   optional, default: 283 — SVG circle circumference in px
+                            (283 ≈ 2π × 45, the standard perimeter for <circle r="45">)
+
+  Example:
+    { "type": "svg.setProgress", "targetId": "cpu-ring", "percent": 72 }
+
+Notes
+-----
+If the <circle>/<path> uses a radius other than 45, pass
+circumference = 2 * Math.PI * radius explicitly; otherwise, the offset
+calculation will not match.

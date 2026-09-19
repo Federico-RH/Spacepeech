@@ -1,0 +1,33 @@
+DebugPlugin — src/plugins/DebugPlugin.js
+==========================================
+
+What it does
+------------
+Debugging and event logging plugin. Logs DataStore mutations and state loading
+to the console with formatted color output.
+
+Options (install(app, options))
+-------------------------------
+logMutations   boolean   default: true
+  When true, logs every Events.DATA_CHANGED (path + new value).
+
+ignoreSystem   boolean   default: true
+  When true, ignores $sys.* variable mutations (clock, viewport, etc.) to
+  avoid console spam on every second or window resize.
+
+Registered Actions
+------------------
+sys.log
+  Logs a message or data payload to the console.
+  Params:
+    message   string   optional — text to log (supports {{...}} interpolation)
+    data      any      optional — logged if message is omitted
+  If neither message nor data is provided, logs a full snapshot of the DataStore.
+
+  Example:
+    { "type": "sys.log", "message": "Current clicks: {{counter}}" }
+
+Listened Events
+---------------
+Events.DATA_CHANGED   → logs mutation (skips $sys.* if ignoreSystem is true)
+Events.STATE_CHANGED  → logs version and root node ID loaded

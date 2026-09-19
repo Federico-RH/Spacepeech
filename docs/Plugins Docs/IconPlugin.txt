@@ -1,0 +1,41 @@
+IconPlugin — src/plugins/IconPlugin.js
+==========================================
+
+What it does
+------------
+A catalog of clean vector SVG icons (currentColor stroke/fill, inheriting
+the element's computed text color). Allows injecting SVG icon markup into
+any existing node via declarative actions.
+
+Included Catalog
+----------------
+power, play, pause, stop, forward, backward, moon, sun, music, lock,
+star, cloud, gps
+
+Options (install(app, options))
+-------------------------------
+customIcons   object   default: {}
+  Additional dictionary { name: "<path .../>" } merged onto the base
+  catalog — allows adding custom icons without modifying the plugin.
+
+  Example:
+    app.use(IconPlugin, { customIcons: { heart: '<path d="..."/>' } })
+
+Registered Actions
+------------------
+icon.set
+  Replaces a node's innerHTML with the requested SVG icon markup.
+  Params:
+    targetId   string   optional — target node ID (default: emitter node)
+    name       string   required — icon name in catalog
+
+  If the name does not exist in the catalog, it safely no-ops without throwing.
+
+  Example:
+    { "type": "icon.set", "name": "play" }
+    { "type": "icon.set", "targetId": "theme-btn", "name": "moon" }
+
+Notes
+-----
+The target node must be an SVG element (or container where <path>/<polygon>
+markup is valid) — the plugin does not validate the tag.
