@@ -125,10 +125,40 @@ export const SystemActions = {
     }, ms);
   },
 
-  "sys.fetch": async ({ url, targetPath = "" }, { dataStore, errorReporter }) => {
+ "sys.fetch": async ({ url, method = "GET", headers = {}, body = null, targetPath = "" }, { dataStore, errorReporter }) => {
     if (!url) return;
     try {
-      const response = await fetch(url);
+      const fetchOptions = {
+        method: method.toUpperCase(),
+        headers: { ...headers },
+      };
+
+      if (body && fetchOptions.method !== "GET" && fetchOptions.method !== "HEAD") {
+        let resolvedBody = body;
+
+        
+// If the body is provided as "{{form}}" or "form", we extract the reactive object from the dataStore
+        if (typeof body === "string") {
+          const match = body.match(/^\{\{(.+?)\}\}$/);
+          const key = match ? match[1].trim() : body;
+          if (typeof dataStore.get === "function" && dataStore.get(key) !== undefined) {
+            resolvedBody = dataStore.get(key);
+          }
+        }
+
+        
+// If it is an object, we serialize it to JSON and ensure the header is set
+        if (typeof resolvedBody === "object" && !(resolvedBody instanceof FormData)) {
+          fetchOptions.body = JSON.stringify(resolvedBody);
+          if (!fetchOptions.headers["Content-Type"]) {
+            fetchOptions.headers["Content-Type"] = "application/json";
+          }
+        } else {
+          fetchOptions.body = resolvedBody;
+        }
+      }
+
+      const response = await fetch(url, fetchOptions);
       if (!response.ok) throw new Error(`HTTP ${response.status} at ${url}`);
       const payload = await response.json();
 
@@ -140,6 +170,7 @@ export const SystemActions = {
         }
       }
     } catch (err) {
+      dataStore.set("status", "error");
       errorReporter?.reportError(err);
     }
   }

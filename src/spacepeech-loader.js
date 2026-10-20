@@ -14,14 +14,22 @@ import { ObserverPlugin } from "./plugins/ObserverPlugin.js";
 import { CalculatorPlugin } from "./plugins/CalculatorPlugin.js";
 import { FormPlugin } from "./plugins/FormPlugin.js";
 import { RealtimePlugin } from "./plugins/RealtimePlugin.js";
-
+import { MathPlugin } from "./plugins/MathPlugin.js";
+import { TextPlugin } from "./plugins/TextPlugin.js";
+import { DevPlugin } from "./plugins/DevPlugin.js";
+import { MixerPlugin } from "./plugins/MixerPlugin.js";
+import { DinoPlugin } from "./plugins/DinoPlugin.js";
+import { LifePlugin } from "./plugins/LifePlugin.js";
+import { VTablePlugin } from "./plugins/VTablePlugin.js";
+import { TableSelectPlugin } from "./plugins/TableSelectPlugin.js";
+import { FractalPlugin } from "./plugins/FractalPlugin.js";
 /**
  * System plugin catalog with instant enable/disable flag.
  */
 const DEFAULT_PLUGINS = [
   { plugin: HydrationPlugin, enabled: true }, // Progressive adoption of static HTML/SSR
   { plugin: UiKitPlugin, enabled: true },
-  { plugin: DebugPlugin, options: { logMutations: true, ignoreSystem: true }, enabled: true },
+  { plugin: DebugPlugin, options: { logMutations: true, ignoreSystem: true }, enabled: false },
   { plugin: SvgPlugin, enabled: true },
   { plugin: IconPlugin, enabled: true },
   { plugin: InteractiveControlsPlugin, enabled: true },
@@ -29,7 +37,16 @@ const DEFAULT_PLUGINS = [
   { plugin: ObserverPlugin, enabled: true },
   { plugin: FormPlugin, enabled: true },
   { plugin: CalculatorPlugin, enabled: true },
-  { plugin: RealtimePlugin, enabled: false }
+  { plugin: MathPlugin, options: { watch: ['m'] }, enabled: true },
+  { plugin: TextPlugin, enabled: true},
+{ plugin: RealtimePlugin, enabled: false },
+{ plugin: DevPlugin, enabled: true },
+{ plugin: MixerPlugin, enabled: true },
+{ plugin: DinoPlugin, enabled: true },
+{ plugin: LifePlugin, enabled: true },
+{ plugin: VTablePlugin, enabled: true },
+{ plugin: TableSelectPlugin, enabled: true },
+{ plugin: FractalPlugin, enabled: true }
 ];
 
 /**
@@ -73,5 +90,14 @@ export {
   ObserverPlugin,
   CalculatorPlugin,
   FormPlugin,
-  RealtimePlugin
+  RealtimePlugin,
+  MathPlugin,
+TextPlugin,
+DevPlugin,
+MixerPlugin,
+DinoPlugin,
+LifePlugin,
+VTablePlugin,
+TableSelectPlugin,
+FractalPlugin
 };
