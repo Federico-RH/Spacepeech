@@ -1,6 +1,21 @@
-# Spacepeech
+ <a href="http://spacepeech.pages.dev">
+<p align="center" >
+<img src="./readme-images/solid.png" alt="spacepeech logo" width="30%">
+<br>
+</p>
 
+<h1 align="center">spacepeech</h1>
+
+</a>
+<p align="center">
 A JSON document describing your entire UI — layout, data, styling, behavior — sent from wherever you want, rendered by a small engine that never rebuilds what it doesn't have to. No build step, no framework lock-in, no virtual DOM diffing the whole tree just to update one number.
+
+<br>
+</p>
+
+![Vanilla JS](https://img.shields.io/badge/Vanilla%20js-f7df1e?style=for-the-badge&logo=javascript&logoColor=black)
+[![MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](./LICENSE)
+![Size](https://img.shields.io/github/repo-size/Federico-RH/Spacepeech?style=for-the-badge)
 
 ## The idea
 
@@ -40,16 +55,85 @@ Copy the `spacepeech-lib` folder into your project — it's self-contained.
   import { spacepeechInit } from "./spacepeech-lib/src/spacepeech-loader.js";
 
   window.app = await spacepeechInit("canvas", {
-    configUrl: "./spacepeech.config.json"
+    configUrl: "./spacepeech.config.json",
   });
 </script>
 ```
 
+Optionally—but it is recommended—you will want to have the "spacepeech.config.json" configuration file located in the same directory. It allows you to choose between local or remote operation, select either hydration mode or SPA mode, specify the backend server URL, define the directory for searching documents/modules, and—finally—determine whether to send telemetry data containing client information.
+
+```json
+{
+  "mode": "website",
+  "source": "api",
+  "baseUrl": "http://[your_site.com]",
+  "defaultPage": "controls",
+  "handshakeEndpoint": "/api/telemetry"
+}
+```
+
+Your first JSON "design" might look like the example below. It is quite easy to identify the function of each section; in this case, it simply displays a `div` containing an `H1` element with the text "Hello World," centered using Flexbox. In your preferred JSON editor, you can simply expand the relevant sections (until one day I finished the spacepeech editor :) ). A quick note: documents can be loaded by others (recursively) as components. In such cases, the parent document's global CSS rules override those of the child components—ensuring a consistent style across the overall design—while the child components apply their own inline styles to their individual nodes. Each component-document can be dynamically updated by its parent. At no point are IFrames used, even though the behavior might appear similar.
+
+```json
+{
+  "version": "1.0",
+  "meta": {
+    "title": "Hello World — Spacepeech"
+  },
+  "root": {
+    "id": "hello-root",
+    "type": "div",
+    "style": {
+      "display": "flex",
+      "align-items": "center",
+      "justify-content": "center",
+      "width": "100%",
+      "height": "100%",
+      "background": "#0a1128"
+    },
+    "children": [
+      {
+        "id": "hello-title",
+        "type": "h1",
+        "style": {
+          "margin": "0",
+          "color": "#22c55e",
+          "font-family": "'Roboto', system-ui, sans-serif",
+          "font-size": "4rem",
+          "font-weight": "700"
+        },
+        "data": {
+          "text": "Hello World"
+        }
+      }
+    ]
+  }
+}
+```
+
+and it turns out looking this beautiful...
+
+<img src="./readme-images/hello.png" alt="hello world example" width="50%"/>
+
+<br>
+
+here for more [examples](https://spacepeech.pages.dev/examples)
+
+<br>
+<img src="./readme-images/examples.png" alt="examples screenshoot" width="30%"/>
+<br>
+
 ## Documentation
 
-- **Technical reference** — the full JSON contract: `docs/contract.md`
-- **User guide** — build your first page: `docs/user-guide.md`
+- **Technical reference** — the full JSON [contract](contract.md)
+- **User guide** — build your first page: [user guide](user-guide.md)
+
+<a href="https://spacepeech.pages.dev/downloads"> 
+<br>
+
+<h1>Downloads here</h1>
+</a>
 
 ## Status & license
 
-Actively developed. The core library is released under the **MIT License** — see `LICENSE`.
+Actively developed and working on an upcoming update. The core library is released under the **MIT License** — see [LICENSE](./LICENSE).
