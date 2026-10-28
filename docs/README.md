@@ -1,12 +1,14 @@
- <a href="http://spacepeech.pages.dev">
+<a href="http://spacepeech.pages.dev">
 <p align="center" >
 <img src="./readme-images/solid.png" alt="spacepeech logo" width="30%">
 <br>
 </p>
-
-<h1 align="center">spacepeech</h1>
-
 </a>
+
+<a href="http://spacepeech.pages.dev">
+<h1 align="center">spacepeech</h1>
+</a>
+
 <p align="center">
 A JSON document describing your entire UI — layout, data, styling, behavior — sent from wherever you want, rendered by a small engine that never rebuilds what it doesn't have to. No build step, no framework lock-in, no virtual DOM diffing the whole tree just to update one number.
 
@@ -137,3 +139,4 @@ here for more [examples](https://spacepeech.pages.dev/examples)
 ## Status & license
 
 Actively developed and working on an upcoming update. The core library is released under the **MIT License** — see [LICENSE](./LICENSE).
+
