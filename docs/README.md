@@ -5,9 +5,9 @@
 </p>
 </a>
 
-<a href="http://spacepeech.pages.dev">
-<h1 align="center">spacepeech</h1>
-</a>
+
+<h1 align="center"><a href="http://spacepeech.pages.dev">spacepeech</a></h1>
+
 
 <p align="center">
 A JSON document describing your entire UI — layout, data, styling, behavior — sent from wherever you want, rendered by a small engine that never rebuilds what it doesn't have to. No build step, no framework lock-in, no virtual DOM diffing the whole tree just to update one number.
@@ -28,7 +28,7 @@ That data can come from anywhere: a static file, an API response, a WebSocket pu
 
 ## Getting started
 
-Copy the `spacepeech-lib` folder into your project — it's self-contained.
+Download* and copy the `spacepeech-lib` folder into your project — it's self-contained. *In the minimal version, the uncompressed size is 106k.
 
 ```html
 <div id="canvas"></div>
@@ -42,7 +42,7 @@ Copy the `spacepeech-lib` folder into your project — it's self-contained.
 </script>
 ```
 
-Optionally—but it is recommended—you will want to have the "spacepeech.config.json" configuration file located in the same directory. It allows you to choose between local or remote operation, select either hydration mode or SPA mode, specify the backend server URL, define the directory for searching documents/modules, and—finally—determine whether to send telemetry data containing client information.
+Optionally—but it is recommended—you will want to have the "spacepeech.config.json" configuration file located in the same directory "configUrl:". It allows you to choose between local or remote operation, select either hydration mode or SPA mode, specify the backend server URL, define the directory for searching documents/modules, and—finally—determine whether to send telemetry data containing client information.
 
 ```json
 {
@@ -131,11 +131,9 @@ This is new. There's no ecosystem, no Stack Overflow answers waiting for you, no
 - **Technical reference** — the full JSON [contract](contract.md)
 - **User guide** — build your first page: [user guide](user-guide.md)
 
-<a href="https://spacepeech.pages.dev/downloads"> 
-<br>
+ 
+<h1><a href="https://spacepeech.pages.dev/downloads">Downloads here</a></h1>
 
-<h1>Downloads here</h1>
-</a>
 
 ## Status & license
 
