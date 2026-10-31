@@ -14,15 +14,7 @@ import { ObserverPlugin } from "./plugins/ObserverPlugin.js";
 import { CalculatorPlugin } from "./plugins/CalculatorPlugin.js";
 import { FormPlugin } from "./plugins/FormPlugin.js";
 import { RealtimePlugin } from "./plugins/RealtimePlugin.js";
-import { MathPlugin } from "./plugins/MathPlugin.js";
-import { TextPlugin } from "./plugins/TextPlugin.js";
-import { DevPlugin } from "./plugins/DevPlugin.js";
-import { MixerPlugin } from "./plugins/MixerPlugin.js";
-import { DinoPlugin } from "./plugins/DinoPlugin.js";
-import { LifePlugin } from "./plugins/LifePlugin.js";
-import { VTablePlugin } from "./plugins/VTablePlugin.js";
-import { TableSelectPlugin } from "./plugins/TableSelectPlugin.js";
-import { FractalPlugin } from "./plugins/FractalPlugin.js";
+
 /**
  * System plugin catalog with instant enable/disable flag.
  */
@@ -37,16 +29,7 @@ const DEFAULT_PLUGINS = [
   { plugin: ObserverPlugin, enabled: true },
   { plugin: FormPlugin, enabled: true },
   { plugin: CalculatorPlugin, enabled: true },
-  { plugin: MathPlugin, options: { watch: ['m'] }, enabled: true },
-  { plugin: TextPlugin, enabled: true},
-{ plugin: RealtimePlugin, enabled: false },
-{ plugin: DevPlugin, enabled: true },
-{ plugin: MixerPlugin, enabled: true },
-{ plugin: DinoPlugin, enabled: true },
-{ plugin: LifePlugin, enabled: true },
-{ plugin: VTablePlugin, enabled: true },
-{ plugin: TableSelectPlugin, enabled: true },
-{ plugin: FractalPlugin, enabled: true }
+  { plugin: RealtimePlugin, enabled: false }
 ];
 
 /**
@@ -90,14 +73,5 @@ export {
   ObserverPlugin,
   CalculatorPlugin,
   FormPlugin,
-  RealtimePlugin,
-  MathPlugin,
-TextPlugin,
-DevPlugin,
-MixerPlugin,
-DinoPlugin,
-LifePlugin,
-VTablePlugin,
-TableSelectPlugin,
-FractalPlugin
+  RealtimePlugin
 };
